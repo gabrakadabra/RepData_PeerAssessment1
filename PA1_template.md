@@ -1,13 +1,9 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-html_document:
-keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
-```{r load_preprocess}
+
+```r
 # load data
 steps <- read.csv('./activity.csv', header = T)
 
@@ -18,7 +14,8 @@ suppressPackageStartupMessages(library('knitr'))
 ```
 
 ## What is mean total number of steps taken per day?
-```{r steps_a_day}
+
+```r
 # Number of steps/day
 daystepcount <- steps %>% group_by(date) %>% summarise(day.count = sum(steps))
 
@@ -26,13 +23,21 @@ daystepcount <- steps %>% group_by(date) %>% summarise(day.count = sum(steps))
 mstepcount <- daystepcount %>% ungroup() %>% 
   summarise(mean = mean(day.count, na.rm = T), median = median(day.count, na.rm = T))
 
-mstepcount %>% data.frame
+mstepcount
 ```
-The mean total steps taken per day was `r format(mstepcount$mean, scientific = F)` and the median total steps taken per day was
-`r mstepcount$median`. 
+
+```
+## Source: local data frame [1 x 2]
+## 
+##       mean median
+## 1 10766.19  10765
+```
+The mean total steps taken per day was 10766.19 and the median total steps taken per day was
+10765. 
 
 ## What is the average daily activity pattern?
-```{r meansteps_interval}
+
+```r
 # Mean step count per inteval (misc)
 misc <- steps %>% group_by(interval) %>% 
   summarise(meansteps = mean(steps, na.rm = T))
@@ -47,23 +52,33 @@ ggplot(misc, aes(x = interval, y = meansteps)) + geom_line() +
             hjust = 0, colour = 'red', size = 4) +
   ylab('Average step count') + xlab('5-min interval during day') + theme_bw()
 ```
-`r maxinterval$label`
+
+![](PA1_template_files/figure-html/meansteps_interval-1.png) 
+Maximum occurs at 206 steps, at interval 835
 
 ## Imputing missing values
-There are `r sum(is.na(steps$steps))` missing values in the dataset.
+There are 2304 missing values in the dataset.
 
 I will impute using the rounded mean number of steps at each interval.
 These values are calculated above in the variable `misc`.
-```{r missing_values}
+
+```r
 #Add the meansteps at each inteval to steps
 steps.imputed <- left_join(steps, misc)
+```
+
+```
+## Joining by: "interval"
+```
+
+```r
 # If step is NA change to meansteps
 steps.imputed <- steps.imputed %>% mutate(steps = ifelse(is.na(steps),round(meansteps,0),steps))
-
 ```
 The new dataset is stored in `steps.imputed` 
 
-```{r imputed_daycount}
+
+```r
 # Number of steps/day imputed
 daystepcount.imp <- steps.imputed %>% group_by(date) %>% 
   summarise(day.count = sum(steps))
@@ -76,36 +91,7 @@ ggplot(daystepcount.imp) + geom_histogram(aes(x = day.count), binwidth = 500) +
   ggtitle('Histogram of total number of steps taken each day') + theme_bw()
 ```
 
-The mean and median number of steps per day of the imputed data
-```{r}
-mstepcount.imp %>% data.frame
-```
-To compare with the  mean and median number of steps per day of the original data
-```{r}
-mstepcount %>% data.frame
-```
-Pretty close! The effect on the mean and median was not that big but we got more data. That is always good :)
+![](PA1_template_files/figure-html/imputed_daycount-1.png) 
+1.0765639\times 10^{4}, 1.0762\times 10^{4} 
 
 ## Are there differences in activity patterns between weekdays and weekends?
-I will use the original dataset as I did not take weekday into account when imputing
-```{r weekdays}
-# set the locale to english for english weekdays
-Sys.setlocale("LC_TIME",'en_US.UTF-8')
-
-#Make dates dateobjects and calculate weekday
-steps.wd <- steps %>% mutate(date = as.Date(date), weekday = weekdays(date)) %>%
-  # Calculate if weekend or weekday
-  mutate(weekend.day = ifelse(weekday %in% c('Saturday','Sunday'),'Weekend','Weekday'))
-
-# Reorder weekend/weekday factor
-steps.wd$weekend.day <- relevel(factor(steps.wd$weekend.day), ref = 'Weekend')
-
-# Average number of steps during weekend/weekdays
-steps.wd.mean <- steps.wd %>% group_by(interval,weekend.day) %>%
-  summarise(mean.steps = mean(steps, na.rm = T))
-
-# Plot the average steps during weekend/weekday with a panelplot
-ggplot(steps.wd.mean) + geom_line(aes(x = interval, y = mean.steps)) + 
-  facet_wrap(~weekend.day,nrow = 2) + theme_bw()
-
-```
