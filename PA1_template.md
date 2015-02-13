@@ -1,4 +1,9 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+html_document:
+keep_md: true
+---
 
 
 ## Loading and preprocessing the data
@@ -23,12 +28,10 @@ daystepcount <- steps %>% group_by(date) %>% summarise(day.count = sum(steps))
 mstepcount <- daystepcount %>% ungroup() %>% 
   summarise(mean = mean(day.count, na.rm = T), median = median(day.count, na.rm = T))
 
-mstepcount
+mstepcount %>% data.frame
 ```
 
 ```
-## Source: local data frame [1 x 2]
-## 
 ##       mean median
 ## 1 10766.19  10765
 ```
@@ -50,10 +53,12 @@ ggplot(misc, aes(x = interval, y = meansteps)) + geom_line() +
   geom_point(data = maxinterval, colour = 'red', size = 2) +
   geom_text(data = maxinterval, aes(x = interval + 20, label=label),
             hjust = 0, colour = 'red', size = 4) +
-  ylab('Average step count') + xlab('5-min interval during day') + theme_bw()
+  ylab('Average step count') + xlab('5-min interval during day') + theme_bw() + 
+  ggtitle('Average step count over time intervals')
 ```
 
-![](PA1_template_files/figure-html/meansteps_interval-1.png) 
+![plot of chunk meansteps_interval](figure/meansteps_interval-1.png) 
+
 Maximum occurs at 206 steps, at interval 835
 
 ## Imputing missing values
@@ -88,10 +93,64 @@ mstepcount.imp <- daystepcount.imp %>% ungroup() %>%
   summarise(mean = mean(day.count, na.rm = T), median = median(day.count, na.rm = T))
 
 ggplot(daystepcount.imp) + geom_histogram(aes(x = day.count), binwidth = 500) + 
-  ggtitle('Histogram of total number of steps taken each day') + theme_bw()
+  ggtitle('Histogram of total number of steps taken each day') + theme_bw() +
+  xlab('Daily step count')
 ```
 
-![](PA1_template_files/figure-html/imputed_daycount-1.png) 
-1.0765639\times 10^{4}, 1.0762\times 10^{4} 
+![plot of chunk imputed_daycount](figure/imputed_daycount-1.png) 
+
+The mean and median number of steps per day of the imputed data
+
+```r
+mstepcount.imp %>% data.frame
+```
+
+```
+##       mean median
+## 1 10765.64  10762
+```
+To compare with the  mean and median number of steps per day of the original data
+
+```r
+mstepcount %>% data.frame
+```
+
+```
+##       mean median
+## 1 10766.19  10765
+```
+Pretty close! The effect on the mean and median was not that big but we got more data. That is always good :)
 
 ## Are there differences in activity patterns between weekdays and weekends?
+I will use the original dataset as I did not take weekday into account when imputing
+
+```r
+# set the locale to english for english weekdays
+Sys.setlocale("LC_TIME",'en_US.UTF-8')
+```
+
+```
+## [1] "en_US.UTF-8"
+```
+
+```r
+#Make dates dateobjects and calculate weekday
+steps.wd <- steps %>% mutate(date = as.Date(date), weekday = weekdays(date)) %>%
+  # Calculate if weekend or weekday
+  mutate(weekend.day = ifelse(weekday %in% c('Saturday','Sunday'),'Weekend','Weekday'))
+
+# Reorder weekend/weekday factor
+steps.wd$weekend.day <- relevel(factor(steps.wd$weekend.day), ref = 'Weekend')
+
+# Average number of steps during weekend/weekdays
+steps.wd.mean <- steps.wd %>% group_by(interval,weekend.day) %>%
+  summarise(mean.steps = mean(steps, na.rm = T))
+
+# Plot the average steps during weekend/weekday with a panelplot
+ggplot(steps.wd.mean) + geom_line(aes(x = interval, y = mean.steps)) + 
+  facet_wrap(~weekend.day,nrow = 2) + theme_bw() + 
+  ggtitle('Mean number of steps per interval by weekday or weekend') + 
+  ylab('Mean number of steps')
+```
+
+![plot of chunk weekdays](figure/weekdays-1.png) 

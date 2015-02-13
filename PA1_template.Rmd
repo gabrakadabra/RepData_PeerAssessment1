@@ -45,8 +45,10 @@ ggplot(misc, aes(x = interval, y = meansteps)) + geom_line() +
   geom_point(data = maxinterval, colour = 'red', size = 2) +
   geom_text(data = maxinterval, aes(x = interval + 20, label=label),
             hjust = 0, colour = 'red', size = 4) +
-  ylab('Average step count') + xlab('5-min interval during day') + theme_bw()
+  ylab('Average step count') + xlab('5-min interval during day') + theme_bw() + 
+  ggtitle('Average step count over time intervals')
 ```
+
 `r maxinterval$label`
 
 ## Imputing missing values
@@ -73,7 +75,8 @@ mstepcount.imp <- daystepcount.imp %>% ungroup() %>%
   summarise(mean = mean(day.count, na.rm = T), median = median(day.count, na.rm = T))
 
 ggplot(daystepcount.imp) + geom_histogram(aes(x = day.count), binwidth = 500) + 
-  ggtitle('Histogram of total number of steps taken each day') + theme_bw()
+  ggtitle('Histogram of total number of steps taken each day') + theme_bw() +
+  xlab('Daily step count')
 ```
 
 The mean and median number of steps per day of the imputed data
@@ -106,6 +109,8 @@ steps.wd.mean <- steps.wd %>% group_by(interval,weekend.day) %>%
 
 # Plot the average steps during weekend/weekday with a panelplot
 ggplot(steps.wd.mean) + geom_line(aes(x = interval, y = mean.steps)) + 
-  facet_wrap(~weekend.day,nrow = 2) + theme_bw()
+  facet_wrap(~weekend.day,nrow = 2) + theme_bw() + 
+  ggtitle('Mean number of steps per interval by weekday or weekend') + 
+  ylab('Mean number of steps')
 
 ```
