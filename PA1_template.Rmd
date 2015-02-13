@@ -28,7 +28,7 @@ mstepcount <- daystepcount %>% ungroup() %>%
 
 mstepcount %>% data.frame
 ```
-The mean total steps taken per day was `r format(mstepcount$mean, scientific = F)` and the median total steps taken per day was
+The mean total number of steps taken per day were `r format(mstepcount$mean, scientific = F)` and the median total steps taken per day were
 `r mstepcount$median`. 
 
 ## What is the average daily activity pattern?
