@@ -36,9 +36,6 @@ ggplot(daystepcount) + geom_histogram(aes(x = day.count), binwidth = 1000) +
 ![plot of chunk steps_a_day_hist](figure/steps_a_day_hist-1.png) 
 
 
-
-
-
 ```r
 # Mean and median number of steps/day
 mstepcount <- daystepcount %>% ungroup() %>% 
@@ -109,7 +106,7 @@ mstepcount.imp <- daystepcount.imp %>% ungroup() %>%
   summarise(mean = mean(day.count, na.rm = T), median = median(day.count, na.rm = T))
 
 ggplot(daystepcount.imp) + geom_histogram(aes(x = day.count), binwidth = 500) + 
-  ggtitle('Histogram of total number of steps taken each day') + theme_bw() +
+  ggtitle('Histogram of total number of steps taken each day\nAfter imputation') + theme_bw() +
   xlab('Daily step count')
 ```
 
