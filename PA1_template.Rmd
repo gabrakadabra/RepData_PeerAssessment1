@@ -21,6 +21,19 @@ suppressPackageStartupMessages(library('knitr'))
 ```{r steps_a_day}
 # Number of steps/day
 daystepcount <- steps %>% group_by(date) %>% summarise(day.count = sum(steps))
+```
+The total number of steps were calculated in `daystepcount` and the output of this calculation is shown
+in the histogram.
+
+```{r steps_a_day_hist}
+ggplot(daystepcount) + geom_histogram(aes(x = day.count), binwidth = 1000) + 
+  theme_bw() + ggtitle('Total number of steps per day') + xlab('Number of steps per day')
+```
+
+
+
+
+```{r mean_steps_a_day}
 
 # Mean and median number of steps/day
 mstepcount <- daystepcount %>% ungroup() %>% 

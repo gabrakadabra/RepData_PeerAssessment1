@@ -23,7 +23,23 @@ suppressPackageStartupMessages(library('knitr'))
 ```r
 # Number of steps/day
 daystepcount <- steps %>% group_by(date) %>% summarise(day.count = sum(steps))
+```
+The total number of steps were calculated in `daystepcount` and the output of this calculation is shown
+in the histogram.
 
+
+```r
+ggplot(daystepcount) + geom_histogram(aes(x = day.count), binwidth = 1000) + 
+  theme_bw() + ggtitle('Total number of steps per day') + xlab('Number of steps per day')
+```
+
+![plot of chunk steps_a_day_hist](figure/steps_a_day_hist-1.png) 
+
+
+
+
+
+```r
 # Mean and median number of steps/day
 mstepcount <- daystepcount %>% ungroup() %>% 
   summarise(mean = mean(day.count, na.rm = T), median = median(day.count, na.rm = T))
@@ -35,7 +51,7 @@ mstepcount %>% data.frame
 ##       mean median
 ## 1 10766.19  10765
 ```
-The mean total steps taken per day was 10766.19 and the median total steps taken per day was
+The mean total number of steps taken per day were 10766.19 and the median total steps taken per day were
 10765. 
 
 ## What is the average daily activity pattern?
